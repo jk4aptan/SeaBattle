@@ -2,7 +2,6 @@ package java1.lesson1.sea_battle.models;
 
 import java1.lesson1.sea_battle.components.Enums.FieldSymbol;
 import java1.lesson1.sea_battle.configs.Config;
-import java1.lesson1.sea_battle.views.ApplicationView;
 
 /**
  * Класс BattleField реализует игровое поле игрока
@@ -39,12 +38,6 @@ public class BattleField {
         return adversarySeaArea;
     }
 
-    /**
-     * Показать игровое поле игрока
-     */
-    public void render() {
-        ApplicationView.getInstance().getView().renderBattleField(playerSeaArea, adversarySeaArea);
-    }
 
     /**
      * Размещение эскадры на поле игрока

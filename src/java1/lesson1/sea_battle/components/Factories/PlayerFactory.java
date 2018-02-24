@@ -1,13 +1,12 @@
 package java1.lesson1.sea_battle.components.Factories;
 
-import java1.lesson1.sea_battle.components.Inputs.ApplicationInput;
-import java1.lesson1.sea_battle.components.Strategies.HandMakeShotStrategy;
 import java1.lesson1.sea_battle.components.Strategies.ImproveAutoMakeShotStrategy;
 import java1.lesson1.sea_battle.components.Strategies.SimpleAutoMakeShotStrategy;
 import java1.lesson1.sea_battle.configs.Config;
+import java1.lesson1.sea_battle.controllers.GameController;
+import java1.lesson1.sea_battle.models.Computer;
 import java1.lesson1.sea_battle.models.IMakeShotStrategy;
 import java1.lesson1.sea_battle.models.Player;
-import java1.lesson1.sea_battle.views.ApplicationView;
 
 public class PlayerFactory {
     private static PlayerFactory instance;
@@ -20,34 +19,38 @@ public class PlayerFactory {
     }
 
 
+    private String playerName;
+    private volatile boolean isSetPlayerName;
+
     private PlayerFactory() {
     }
 
-    public Player createPlayer() {
-        // define the name
-        ApplicationView.getInstance().getView().renderInputName();
-        String name = ApplicationInput.getInstance().getInput().getString();
-        // define the makeShotStrategy
-        IMakeShotStrategy makeShotStrategy = new HandMakeShotStrategy();
 
-        return new Player(name, makeShotStrategy);
+    public Player createPlayer() {
+        isSetPlayerName = false;
+        GameController.getInstance().getPlayerName();
+        while (!isSetPlayerName) {};
+        return new Player(playerName);
     }
 
-    public Player createDefaultPlayer() {
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public void setIsSetPlayerName(boolean value) {
+        this.isSetPlayerName = value;
+    }
+
+
+    public Player createAdversary() {
         Player player = null;
-        switch (Config.SHOTING_MODE) {
-            case HAND:
-                player = new Player(Config.DEFAULT_PLAYER_NAME, new HandMakeShotStrategy());
+
+        switch (Config.MAKE_SHOT_STRATEGY) {
+            case SIMPLE:
+                player = new Computer(Config.DEFAULT_PLAYER_NAME, new SimpleAutoMakeShotStrategy());
                 break;
-            case AUTO:
-                switch (Config.MAKE_SHOT_STRATEGY) {
-                    case SIMPLE:
-                        player = new Player(Config.DEFAULT_PLAYER_NAME, new SimpleAutoMakeShotStrategy());
-                        break;
-                    case IMPROVE:
-                        player = new Player(Config.DEFAULT_PLAYER_NAME, new ImproveAutoMakeShotStrategy());
-                        break;
-                }
+            case IMPROVE:
+                player = new Computer(Config.DEFAULT_PLAYER_NAME, new ImproveAutoMakeShotStrategy());
                 break;
         }
 
@@ -55,6 +58,6 @@ public class PlayerFactory {
     }
 
     public Player createPlayer(String name, IMakeShotStrategy makeShotStrategy) {
-        return new Player(name, makeShotStrategy);
+        return new Computer(name, makeShotStrategy);
     }
 }

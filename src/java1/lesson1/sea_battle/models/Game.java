@@ -5,109 +5,94 @@ import java1.lesson1.sea_battle.components.Enums.OutputMessage;
 import java1.lesson1.sea_battle.components.Enums.ShipState;
 import java1.lesson1.sea_battle.components.Factories.PlayerFactory;
 import java1.lesson1.sea_battle.components.Factories.SquadronFactory;
-import java1.lesson1.sea_battle.components.Strategies.ImproveAutoMakeShotStrategy;
-import java1.lesson1.sea_battle.components.Strategies.SimpleAutoMakeShotStrategy;
-import java1.lesson1.sea_battle.views.ApplicationView;
+import java1.lesson1.sea_battle.controllers.GameController;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Game {
     private static Game instance;
 
-    public static Game getInstance() {
-        if (instance == null) {
-            instance = new Game();
-        }
-        return instance;
-    }
+    private Map<Player, Squadron> squadrons;
+    private Map<Player, BattleField> battleFields;
+    private Player player;
+    private Player adversary;
+    private GameController gameController;
 
 
-    private ArrayList<Squadron> squadrons;
-    private ArrayList<BattleField> battleFields;
-    private ArrayList<Player> players;
+    public Game() {
+        player = PlayerFactory.getInstance().createPlayer();
+        adversary = PlayerFactory.getInstance().createAdversary();
 
-    private Game() {
-        squadrons = new ArrayList<>();
+        squadrons = new HashMap<>();
         Squadron squadron1 = SquadronFactory.getInstance().createSquadron();
         Squadron squadron2 = SquadronFactory.getInstance().createSquadron();
-        squadrons.add(squadron1);
-        squadrons.add(squadron2);
+        squadrons.put(player, squadron1);
+        squadrons.put(adversary, squadron2);
 
-        battleFields = new ArrayList<>();
+        battleFields = new HashMap<>();
         BattleField battleField1 = new BattleField();
         battleField1.initWithSquadron(squadron1);
         BattleField battleField2 = new BattleField();
         battleField2.initWithSquadron(squadron2);
-        battleFields.add(battleField1);
-        battleFields.add(battleField2);
+        battleFields.put(player, battleField1);
+        battleFields.put(adversary, battleField2);
 
-        players = new ArrayList<>();
-    }
-
-    /**
-     * Инициализация игры по умолчанию
-     */
-    public void initDefault() {
-//        players.add(PlayerFactory.getInstance().createDefaultPlayer());
-//        players.add(PlayerFactory.getInstance().createPlayer());
-        Player pl1 = PlayerFactory.getInstance().createPlayer("John", new SimpleAutoMakeShotStrategy());
-        Player pl2 = PlayerFactory.getInstance().createPlayer("Nik", new ImproveAutoMakeShotStrategy());
-        players.add(pl1);
-        players.add(pl2);
+        gameController = GameController.getInstance();
+        gameController.setPlayer(player);
+        gameController.greetingPlayer();
+        gameController.updateBattleField(battleFields.get(player));
     }
 
     /**
      * Игровой цикл
      */
     public void start() {
-        int currentPlayer = 0;
-        int adversary;
+        Player currentPlayer = player;
+        Player currentAdversary;
         boolean isSuccess = false;
-
-        // Приветствие игрокам
-        ApplicationView.getInstance().getView().renderGreetingPlayers(players);
 
         while (true) {
             // Установить текущего игрока
             if (!isSuccess) {
-                currentPlayer = currentPlayer == 0 ? 1 : 0;
+                currentPlayer = currentPlayer == player ? adversary : player;
             }
-            adversary = currentPlayer == 0 ? 1 : 0;
-
-            // Показать игровое поле
-            battleFields.get(currentPlayer).render();
+            currentAdversary = currentPlayer == player ? adversary : player;
 
             // Сделать выстрел
-            Shot shot = players.get(currentPlayer).makeShot();
+            Shot shot = currentPlayer.makeShot();
 
             // Обработать выстрел
-            ShipState result = squadrons.get(adversary).getResult(shot);
+            ShipState result = squadrons.get(currentAdversary).getResult(shot);
             switch (result) {
                 case UNHARMED:
                     battleFields.get(currentPlayer).getAdversarySeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.PAST.getValue());
-                    battleFields.get(adversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.PAST.getValue());
-                    ApplicationView.getInstance().getView().renderShotingResult(OutputMessage.PAST.getMessage());
+                    battleFields.get(currentAdversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.PAST.getValue());
                     isSuccess = false;
                     break;
                 case WOUNDED:
                     battleFields.get(currentPlayer).getAdversarySeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
-                    battleFields.get(adversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
-                    ApplicationView.getInstance().getView().renderShotingResult(OutputMessage.WOUNDED.getMessage());
+                    battleFields.get(currentAdversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
                     isSuccess = true;
                     break;
                 case SUNK:
                     battleFields.get(currentPlayer).getAdversarySeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
-                    battleFields.get(adversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
-                    ApplicationView.getInstance().getView().renderShotingResult(OutputMessage.SUNK.getMessage());
+                    battleFields.get(currentAdversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
                     isSuccess = true;
                     break;
             }
-            System.out.println();
+
+            // Показать игровое поле
+            if (currentPlayer.getName().equals(player.getName())) {
+                gameController.updateBattleField(battleFields.get(player));
+                gameController.showResult(player, result);
+            } else {
+                gameController.showResult(adversary, result);
+            }
 
             // Проверить на окончание игры
-            if (squadrons.get(adversary).isLosing()) {
-                battleFields.get(currentPlayer).render();
-                ApplicationView.getInstance().getView().renderCongratulations(players.get(currentPlayer).getName());
+            if (squadrons.get(currentAdversary).isLosing()) {
+                gameController.gameIsOver(currentPlayer);
                 break;
             }
         }

@@ -1,6 +1,8 @@
 package java1.lesson1.sea_battle;
 
+import java1.lesson1.sea_battle.controllers.GameController;
 import java1.lesson1.sea_battle.models.Game;
+import java1.lesson1.sea_battle.views.GameWindow;
 
 /*
 Написать программу (начальный прототип Морского Боя), которая будет:
@@ -44,8 +46,9 @@ https://ru.wikipedia.org/wiki/Model-View-Controlle...
 
 public class Main {
     public static void main(String[] args) {
-        Game game = Game.getInstance();
-        game.initDefault();
+        GameWindow gameWindow = new GameWindow();
+
+        Game game = new Game();
         game.start();
     }
 }

@@ -18,10 +18,8 @@ public class Config {
     public static final int MAX_COORDINATE;
     public static final String DEFAULT_PLAYER_NAME;
     public static final ArrayList<Integer> SQUADRON_CONFIG;
-    public static final ShotingMode SHOTING_MODE;
     public static final MakeShotStrategy MAKE_SHOT_STRATEGY;
     public static final CreatingShipMode CREATING_SHIP_MODE;
-    public static final ApplicationType APPLICATION_TYPE;
 
     static {
         BATTLE_FIELD_COLUMNS_COUNT = 10;
@@ -30,17 +28,11 @@ public class Config {
 
         DEFAULT_PLAYER_NAME = "computer";
 
-        // APPLICATION_TYPE's values - CONSOLE, GUI
-        APPLICATION_TYPE = ApplicationType.CONSOLE;
-
         // CREATING_SHIP_MODE's values - AUTO, HAND
         CREATING_SHIP_MODE = CreatingShipMode.AUTO;
 
-        // SHOTING_MODE's values - AUTO, HAND
-        SHOTING_MODE = ShotingMode.AUTO;
-
         // MakeShotStrategy's values - SIMPLE, IMPROVE
-        MAKE_SHOT_STRATEGY = MakeShotStrategy.SIMPLE;
+        MAKE_SHOT_STRATEGY = MakeShotStrategy.IMPROVE;
 
         SQUADRON_CONFIG = new ArrayList<>();
         SQUADRON_CONFIG.add(FOUR_DECK_SHIP);
