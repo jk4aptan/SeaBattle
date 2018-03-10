@@ -5,9 +5,11 @@ import java1.lesson1.sea_battle.components.Strategies.SimpleAutoMakeShotStrategy
 import java1.lesson1.sea_battle.configs.Config;
 import java1.lesson1.sea_battle.controllers.GameController;
 import java1.lesson1.sea_battle.models.Computer;
-import java1.lesson1.sea_battle.models.IMakeShotStrategy;
 import java1.lesson1.sea_battle.models.Player;
 
+/**
+ * Фабрика создания игроков
+ */
 public class PlayerFactory {
     private static PlayerFactory instance;
 
@@ -19,29 +21,25 @@ public class PlayerFactory {
     }
 
 
-    private String playerName;
-    private volatile boolean isSetPlayerName;
-
     private PlayerFactory() {
     }
 
 
+    /**
+     * Создает игрока с заданым именем
+     *
+     * @return игрок с заданым именем
+     */
     public Player createPlayer() {
-        isSetPlayerName = false;
-        GameController.getInstance().getPlayerName();
-        while (!isSetPlayerName) {};
-        return new Player(playerName);
+        return new Player(GameController.getInstance().getPlayerName());
     }
 
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
-    }
-
-    public void setIsSetPlayerName(boolean value) {
-        this.isSetPlayerName = value;
-    }
-
-
+    /**
+     * Создает автоматического игрока по умолчанию с заданой стратегией выстрелов.
+     * Стратегия выстрелов задается в конфигурации приложения.
+     *
+     * @return автоматический игрок с заданой стратегией выстрелов
+     */
     public Player createAdversary() {
         Player player = null;
 
@@ -55,9 +53,5 @@ public class PlayerFactory {
         }
 
         return player;
-    }
-
-    public Player createPlayer(String name, IMakeShotStrategy makeShotStrategy) {
-        return new Computer(name, makeShotStrategy);
     }
 }

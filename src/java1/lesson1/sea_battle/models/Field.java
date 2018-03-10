@@ -1,22 +1,14 @@
 package java1.lesson1.sea_battle.models;
 
-import java1.lesson1.sea_battle.components.Enums.FieldSymbol;
 import java1.lesson1.sea_battle.configs.Config;
 
+/**
+ * Поле игрока для размещения кораблей
+ */
 public class Field {
-    public static final char[] columnsSymbols = init(Config.BATTLE_FIELD_COLUMNS_COUNT, FieldSymbol.START_COLUMN.getValue());
-    public static final char[] columnsSymbolsLow = init(Config.BATTLE_FIELD_COLUMNS_COUNT, FieldSymbol.START_COLUMN_LOW.getValue());
-    public static final char[] rowsSymbols = init(Config.BATTLE_FIELD_ROWS_COUNT, FieldSymbol.START_ROW.getValue());
-
-    private static char[] init(int count, char currentSymbol) {
-        char[] symbols = new char[count];
-        for (int i = 0; i < count; i++) {
-            symbols[i] = currentSymbol++;
-        }
-        return symbols;
-    }
-
-
+    /**
+     * Ячейки поля. Размер поля задается в конфигурации приложения.
+     */
     private char[][] fieldArea;
 
     public Field() {

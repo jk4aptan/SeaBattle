@@ -5,6 +5,9 @@ import java1.lesson1.sea_battle.components.Enums.ShipState;
 import java1.lesson1.sea_battle.models.Coordinate;
 import java1.lesson1.sea_battle.models.Ship;
 
+/**
+ * Фабрика создания кораблей
+ */
 class ShipFactory {
     private static ShipFactory instance;
 
@@ -16,14 +19,15 @@ class ShipFactory {
     }
 
 
+
     private ShipFactory() {
     }
 
     /**
      * Создание корабля в автоматическом режиме
      *
-     * @param shipDecks
-     * @return Ship
+     * @param shipDecks колличество палуб корабля
+     * @return Ship n-палубный корабль
      */
     Ship createShipAuto(int shipDecks) {
         final int VERTICAL_COORDINATE_STEP = 10;
@@ -56,22 +60,11 @@ class ShipFactory {
     }
 
     /**
-     * (заглушка)
-     * Создание корабля в ручном режиме
-     *
-     * @param shipDecks
-     * @return Ship
-     */
-    Ship createShipHand(int shipDecks) {
-        return new Ship();
-    }
-
-    /**
      * Проверка валидности координат корабля
      *
-     * @param coordinates
-     * @param orientation
-     * @return boolean
+     * @param coordinates координаты корабля
+     * @param orientation ориентация корабля
+     * @return true - если координаты корабля находятся в пределах игрового поля, false - если выходят за границу игрового поля
      */
     private boolean isShipCoordinatesValid(Coordinate[] coordinates, ShipOrientation  orientation) {
         int row = -1;
@@ -94,5 +87,16 @@ class ShipFactory {
             }
         }
         return true;
+    }
+
+    /**
+     * (заглушка)
+     * Создание корабля в ручном режиме
+     *
+     * @param shipDecks колличество палуб корабля
+     * @return Ship n-палубный корабль
+     */
+    Ship createShipHand(int shipDecks) {
+        return new Ship();
     }
 }

@@ -26,6 +26,8 @@ public class ImproveAutoMakeShotStrategy implements IMakeShotStrategy{
     private boolean isFirstWoundedState;
     private boolean isRepeatWoundedState;
 
+
+
     public ImproveAutoMakeShotStrategy() {
         isFirstWoundedState = false;
         isRepeatWoundedState = false;
@@ -43,6 +45,7 @@ public class ImproveAutoMakeShotStrategy implements IMakeShotStrategy{
         // координаты стрельбы по 1-х палубным кораблям
         makeImproveShots(Config.ONE_DECK_SHIP);
     }
+
 
     /**
      * Реализует улучшенный алгоритм стрельбы по кораблям противника.
@@ -104,24 +107,26 @@ public class ImproveAutoMakeShotStrategy implements IMakeShotStrategy{
         return new Coordinate(shot);
     }
 
+
     /**
      * Задает базовую последовательность координат выстрелов по кораблям
-     * @param columnStep
+     *
+     * @param shipDecks колличество палуб корабля
      */
-    private void makeImproveShots(int columnStep) {
-        if (columnStep == Config.ONE_DECK_SHIP) {
+    private void makeImproveShots(int shipDecks) {
+        if (shipDecks == Config.ONE_DECK_SHIP) {
             for (int i = 0; i < Config.MAX_COORDINATE; i++) {
                 if (!shots.contains(i)) {
                     shots.add(i);
                 }
             }
         } else {
-            int firstColumn = columnStep - 1;
+            int firstColumn = shipDecks - 1;
             int startColumn = firstColumn;
             int shot = 0;
 
             for (int row = 0; row < Config.MAX_COORDINATE; row += ROWS_STEP) {
-                for (int column = startColumn; column < Config.BATTLE_FIELD_COLUMNS_COUNT; column += columnStep) {
+                for (int column = startColumn; column < Config.BATTLE_FIELD_COLUMNS_COUNT; column += shipDecks) {
                     shot = row + column;
                     if (!shots.contains(shot)) {
                         shots.add(shot);
@@ -130,13 +135,13 @@ public class ImproveAutoMakeShotStrategy implements IMakeShotStrategy{
                 startColumn = (startColumn == 0) ? firstColumn : startColumn - 1;
             }
         }
-
-
     }
 
+
     /**
-     * Задает последовательность координат выстрелов после первого ранения корабля
-     * @param luckyShot
+     * Вычисляет последовательность координат выстрелов после первого ранения корабля
+     *
+     * @param luckyShot поразивший корабль выстрел
      */
     private void makeAfterFirstWoundedShots(int luckyShot) {
         afterFirstWoundedShots.clear();
@@ -203,9 +208,11 @@ public class ImproveAutoMakeShotStrategy implements IMakeShotStrategy{
         }
     }
 
+
     /**
-     * Задает последовательность координат выстрелов после повторного ранения корабля
-     * @param luckyShots
+     * Вычисляет последовательность координат выстрелов после повторного ранения корабля
+     *
+     * @param luckyShots поразивший корабль выстрел
      */
     private void makeAfterRepeatWoundedShots(LinkedList<Integer> luckyShots) {
         afterRepeatWoundedShots.clear();
@@ -234,10 +241,12 @@ public class ImproveAutoMakeShotStrategy implements IMakeShotStrategy{
         }
     }
 
+
     /**
      * После того как корабль потоплен, данный метод сохраняет ячейки поля, которые располагаются вокруг корабля.
      * Эти ячейки не будут использоваться для стрельбы.
-     * @param luckyShots
+     *
+     * @param luckyShots поразивший корабль выстрел
      */
     private void addMadeShots(LinkedList<Integer> luckyShots) {
         for (Integer luckyShot : luckyShots) {

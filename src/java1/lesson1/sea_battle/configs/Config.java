@@ -1,12 +1,13 @@
 package java1.lesson1.sea_battle.configs;
 
-import java1.lesson1.sea_battle.components.Enums.ApplicationType;
 import java1.lesson1.sea_battle.components.Enums.CreatingShipMode;
 import java1.lesson1.sea_battle.components.Enums.MakeShotStrategy;
-import java1.lesson1.sea_battle.components.Enums.ShotingMode;
 
 import java.util.ArrayList;
 
+/**
+ * Конфигурация приложения
+ */
 public class Config {
     public static final int ONE_DECK_SHIP = 1;
     public static final int TWO_DECK_SHIP = 2;
@@ -26,7 +27,7 @@ public class Config {
         BATTLE_FIELD_ROWS_COUNT = 10;
         MAX_COORDINATE = BATTLE_FIELD_COLUMNS_COUNT * BATTLE_FIELD_ROWS_COUNT;
 
-        DEFAULT_PLAYER_NAME = "computer";
+        DEFAULT_PLAYER_NAME = "Computer";
 
         // CREATING_SHIP_MODE's values - AUTO, HAND
         CREATING_SHIP_MODE = CreatingShipMode.AUTO;

@@ -7,6 +7,9 @@ import java1.lesson1.sea_battle.models.Squadron;
 
 import java.util.ArrayList;
 
+/**
+ * Фабрика создания эскадры кораблей
+ */
 public class SquadronFactory {
     private static SquadronFactory instance;
 
@@ -17,8 +20,12 @@ public class SquadronFactory {
         return instance;
     }
 
-
+    /**
+     * Занятые кораблями ячейки поля
+     */
     private ArrayList<Integer> busySells;
+
+
 
     private SquadronFactory() {
         busySells = new ArrayList<>();
@@ -27,7 +34,7 @@ public class SquadronFactory {
     /**
      * Создание эскадры кораблей
      *
-     * @return Squadron
+     * @return эскадра кораблей
      */
     public Squadron createSquadron() {
         Squadron squadron = new Squadron();
@@ -50,7 +57,7 @@ public class SquadronFactory {
             // добавить корабль в эскадру
             squadron.addShip(ship);
 
-            // запомнить занятые ячейки
+            // запомнить занятые кораблем ячейки поля
             addBusySells(ship.getCoordinates());
         }
         busySells.clear();
@@ -60,12 +67,11 @@ public class SquadronFactory {
     /**
      * Проверка валидности размещения корабля в эскадре
      *
-     * @param ship
-     * @return
+     * @param ship проверяемый корабль
+     * @return true - если координаты корабля не попадают на занятые ячейки поля, false - в противном случае
      */
     private boolean isShipValid(Ship ship) {
         for (Coordinate deck : ship.getCoordinates()) {
-            // координаты корабля попадают на занятые ячейки поля
             if (busySells.contains(deck.getValue())) {
                 return false;
             }
@@ -73,87 +79,102 @@ public class SquadronFactory {
         return true;
     }
 
+
     /**
      * Сохранить ячейки занятые кораблем и ячейки вокруг корабля.
      * Ячейки занятые кораблем и вокруг него немогут быть заняты другим кораблем.
      *
-     * @param shipCoordinates
+     * @param shipCoordinates координаты корабля
      */
     private void addBusySells(Coordinate[] shipCoordinates) {
+        busySells.addAll(getBusySells(shipCoordinates));
+    }
+
+
+    /**
+     * Вычисляет ячейки занятые кораблем и ячейки вокруг корабля.
+     *
+     * @param shipCoordinates координаты корабля
+     * @return ячейки занятые кораблем и ячейки вокруг корабля
+     */
+    public ArrayList<Integer> getBusySells(Coordinate[] shipCoordinates) {
         final int COLUMN = 1;
         final int ROW = 10;
 
+        ArrayList<Integer> sells = new ArrayList<>();
+
         for (Coordinate deck : shipCoordinates) {
-            busySells.add(deck.getValue());
+            sells.add(deck.getValue());
 
             if (deck.getColumn() == 0) {
                 switch (deck.getRow()) {
                     case 0:
-                        busySells.add(deck.getValue() + COLUMN);
-                        busySells.add(deck.getValue() + ROW);
-                        busySells.add(deck.getValue() + ROW + COLUMN);
+                        sells.add(deck.getValue() + COLUMN);
+                        sells.add(deck.getValue() + ROW);
+                        sells.add(deck.getValue() + ROW + COLUMN);
                         break;
                     case 9:
-                        busySells.add(deck.getValue() + COLUMN);
-                        busySells.add(deck.getValue() - ROW);
-                        busySells.add(deck.getValue() - ROW + COLUMN);
+                        sells.add(deck.getValue() + COLUMN);
+                        sells.add(deck.getValue() - ROW);
+                        sells.add(deck.getValue() - ROW + COLUMN);
                         break;
                     default:
-                        busySells.add(deck.getValue() + COLUMN);
-                        busySells.add(deck.getValue() - ROW);
-                        busySells.add(deck.getValue() - ROW + COLUMN);
-                        busySells.add(deck.getValue() + ROW);
-                        busySells.add(deck.getValue() + ROW + COLUMN);
+                        sells.add(deck.getValue() + COLUMN);
+                        sells.add(deck.getValue() - ROW);
+                        sells.add(deck.getValue() - ROW + COLUMN);
+                        sells.add(deck.getValue() + ROW);
+                        sells.add(deck.getValue() + ROW + COLUMN);
                 }
             }
 
             if (deck.getColumn() == 9) {
                 switch (deck.getRow()) {
                     case 0:
-                        busySells.add(deck.getValue() - COLUMN);
-                        busySells.add(deck.getValue() + ROW);
-                        busySells.add(deck.getValue() + ROW - COLUMN);
+                        sells.add(deck.getValue() - COLUMN);
+                        sells.add(deck.getValue() + ROW);
+                        sells.add(deck.getValue() + ROW - COLUMN);
                         break;
                     case 9:
-                        busySells.add(deck.getValue() - COLUMN);
-                        busySells.add(deck.getValue() - ROW);
-                        busySells.add(deck.getValue() - ROW - COLUMN);
+                        sells.add(deck.getValue() - COLUMN);
+                        sells.add(deck.getValue() - ROW);
+                        sells.add(deck.getValue() - ROW - COLUMN);
                         break;
                     default:
-                        busySells.add(deck.getValue() - COLUMN);
-                        busySells.add(deck.getValue() - ROW);
-                        busySells.add(deck.getValue() - ROW - COLUMN);
-                        busySells.add(deck.getValue() + ROW);
-                        busySells.add(deck.getValue() + ROW - COLUMN);
+                        sells.add(deck.getValue() - COLUMN);
+                        sells.add(deck.getValue() - ROW);
+                        sells.add(deck.getValue() - ROW - COLUMN);
+                        sells.add(deck.getValue() + ROW);
+                        sells.add(deck.getValue() + ROW - COLUMN);
                 }
             }
 
-            if (deck.getRow() == 0) {
-                busySells.add(deck.getValue() - COLUMN);
-                busySells.add(deck.getValue() + COLUMN);
-                busySells.add(deck.getValue() + ROW);
-                busySells.add(deck.getValue() + ROW - COLUMN);
-                busySells.add(deck.getValue() + ROW + COLUMN);
+            if (deck.getRow() == 0 && deck.getValue() != 0 && deck.getValue() != 9) {
+                sells.add(deck.getValue() - COLUMN);
+                sells.add(deck.getValue() + COLUMN);
+                sells.add(deck.getValue() + ROW);
+                sells.add(deck.getValue() + ROW - COLUMN);
+                sells.add(deck.getValue() + ROW + COLUMN);
             }
 
-            if (deck.getRow() == 9) {
-                busySells.add(deck.getValue() - COLUMN);
-                busySells.add(deck.getValue() + COLUMN);
-                busySells.add(deck.getValue() - ROW);
-                busySells.add(deck.getValue() - ROW - COLUMN);
-                busySells.add(deck.getValue() - ROW + COLUMN);
+            if (deck.getRow() == 9 && deck.getValue() != 90 && deck.getValue() != 99) {
+                sells.add(deck.getValue() - COLUMN);
+                sells.add(deck.getValue() + COLUMN);
+                sells.add(deck.getValue() - ROW);
+                sells.add(deck.getValue() - ROW - COLUMN);
+                sells.add(deck.getValue() - ROW + COLUMN);
             }
 
             if (deck.getColumn() != 0 && deck.getColumn() != 9 && deck.getRow() != 0 && deck.getRow() != 9) {
-                busySells.add(deck.getValue() - COLUMN);
-                busySells.add(deck.getValue() + COLUMN);
-                busySells.add(deck.getValue() - ROW);
-                busySells.add(deck.getValue() - ROW - COLUMN);
-                busySells.add(deck.getValue() - ROW + COLUMN);
-                busySells.add(deck.getValue() + ROW);
-                busySells.add(deck.getValue() + ROW - COLUMN);
-                busySells.add(deck.getValue() + ROW + COLUMN);
+                sells.add(deck.getValue() - COLUMN);
+                sells.add(deck.getValue() + COLUMN);
+                sells.add(deck.getValue() - ROW);
+                sells.add(deck.getValue() - ROW - COLUMN);
+                sells.add(deck.getValue() - ROW + COLUMN);
+                sells.add(deck.getValue() + ROW);
+                sells.add(deck.getValue() + ROW - COLUMN);
+                sells.add(deck.getValue() + ROW + COLUMN);
             }
         }
+        return sells;
     }
 }

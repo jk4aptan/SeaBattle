@@ -1,27 +1,67 @@
 package java1.lesson1.sea_battle.models;
 
-import java1.lesson1.sea_battle.components.Enums.FieldSymbol;
-import java1.lesson1.sea_battle.components.Enums.OutputMessage;
 import java1.lesson1.sea_battle.components.Enums.ShipState;
 import java1.lesson1.sea_battle.components.Factories.PlayerFactory;
 import java1.lesson1.sea_battle.components.Factories.SquadronFactory;
 import java1.lesson1.sea_battle.controllers.GameController;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс реализующий модель игры
+ */
 public class Game {
-    private static Game instance;
+    public static final Object gameKey = new Object();
+    /**
+     * Флаг инициализации новой игры
+     */
+    private static boolean isNewGame = false;
+    /**
+     * Флаг старта новой игры
+     */
+    private static boolean isGameStart = false;
 
+    /**
+     * Эскадры игроков
+     */
     private Map<Player, Squadron> squadrons;
+    /**
+     * Игровые поля игроков
+     */
     private Map<Player, BattleField> battleFields;
+    /**
+     * Игрок
+     */
     private Player player;
+    /**
+     * Противник
+     */
     private Player adversary;
-    private GameController gameController;
+    /**
+     * Контроллер игры
+     */
+    private final GameController gameController;
 
 
+    /**
+     * Конструктор игры
+     */
     public Game() {
+        gameController = GameController.getInstance();
+        gameController.setGame(this);
+
         player = PlayerFactory.getInstance().createPlayer();
+        gameController.setPlayer(player);
+    }
+
+
+    /**
+     * Инициализация игры
+     */
+    public void init() throws InterruptedException {
         adversary = PlayerFactory.getInstance().createAdversary();
 
         squadrons = new HashMap<>();
@@ -37,12 +77,8 @@ public class Game {
         battleField2.initWithSquadron(squadron2);
         battleFields.put(player, battleField1);
         battleFields.put(adversary, battleField2);
-
-        gameController = GameController.getInstance();
-        gameController.setPlayer(player);
-        gameController.greetingPlayer();
-        gameController.updateBattleField(battleFields.get(player));
     }
+
 
     /**
      * Игровой цикл
@@ -66,35 +102,81 @@ public class Game {
             ShipState result = squadrons.get(currentAdversary).getResult(shot);
             switch (result) {
                 case UNHARMED:
-                    battleFields.get(currentPlayer).getAdversarySeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.PAST.getValue());
-                    battleFields.get(currentAdversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.PAST.getValue());
+                    gameController.setCurrentResult(currentPlayer, shot, Color.WHITE, "МИМО");
                     isSuccess = false;
                     break;
                 case WOUNDED:
-                    battleFields.get(currentPlayer).getAdversarySeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
-                    battleFields.get(currentAdversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
+                    gameController.setCurrentResult(currentPlayer, shot, Color.ORANGE, "РАНИЛ");
                     isSuccess = true;
                     break;
                 case SUNK:
-                    battleFields.get(currentPlayer).getAdversarySeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
-                    battleFields.get(currentAdversary).getPlayerSeaArea().setCell(shot.getCoordinate().getColumn(), shot.getCoordinate().getRow(), FieldSymbol.WOUNDED.getValue());
+                    Ship sunkShip = squadrons.get(currentAdversary).getLastSunkShip();
+                    ArrayList<Integer> busySells = SquadronFactory.getInstance().getBusySells(sunkShip.getCoordinates());
+                    gameController.setLastSunkShip(currentPlayer, sunkShip, "ПОТОПИЛ", busySells);
                     isSuccess = true;
                     break;
-            }
-
-            // Показать игровое поле
-            if (currentPlayer.getName().equals(player.getName())) {
-                gameController.updateBattleField(battleFields.get(player));
-                gameController.showResult(player, result);
-            } else {
-                gameController.showResult(adversary, result);
             }
 
             // Проверить на окончание игры
             if (squadrons.get(currentAdversary).isLosing()) {
+                isNewGame = false;
                 gameController.gameIsOver(currentPlayer);
-                break;
+
+                // ждать решения, будет новая игра или нет
+                try {
+                    synchronized (gameKey) {
+                        while (!isNewGame) {
+                            gameKey.wait();
+                        }
+                    }
+
+                    // инициализировать игру
+                    init();
+                    gameController.initView();
+
+                    synchronized (gameKey) {
+                        while (!isGameStart) {
+                            gameKey.wait();
+                        }
+                    }
+
+                    // запустить новую игру
+                    start();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
             }
         }
+    }
+
+
+    /**
+     * Передает игровое поле игрока
+     *
+     * @return игровое поле игрока
+     */
+    public BattleField getPlayerBattleField() {
+        return battleFields.get(player);
+    }
+
+
+    /**
+     * Устанавливает флаг новой игры
+     *
+     * @param value true - новая игра
+     */
+    public static void setIsNewGame(boolean value) {
+        Game.isNewGame = value;
+    }
+
+
+    /**
+     * Устанавливает флаг старта новой игры
+     *
+     * @param value true - старт новой игры
+     */
+    public static void setIsGameStart(boolean value) {
+        Game.isGameStart = value;
     }
 }
